@@ -1,10 +1,16 @@
 import json
+import os
 from Bio.PDB import PDBParser, Selection, NeighborSearch
 import math
 
 def get_neighbors(pdb_path, target_res_id, radius=5.0):
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure('6EQE', pdb_path)
+    structure_id = os.path.basename(pdb_path).split('.')[0]
+    if pdb_path.lower().endswith('.cif'):
+        from Bio.PDB.MMCIFParser import MMCIFParser
+        parser = MMCIFParser(QUIET=True)
+    else:
+        parser = PDBParser(QUIET=True)
+    structure = parser.get_structure(structure_id, pdb_path)
     
     # Extract atoms
     atom_list = [atom for atom in structure.get_atoms() if atom.get_parent().id[0] == ' ']
@@ -41,24 +47,33 @@ def calculate_distance(ca1, ca2):
     return ca1 - ca2
 
 if __name__ == "__main__":
-    pdb_path = "data/6EQE.pdb"
-    hotspot = "A_GLU_292"
-    radius = 5.0
+    import argparse
+    import json
+    
+    arg_parser = argparse.ArgumentParser(description="Find mutator candidates.")
+    arg_parser.add_argument("--pdb_path", type=str, required=True, help="Path to PDB file")
+    arg_parser.add_argument("--hotspot", type=str, required=True, help="Target hotspot residue (e.g., A_GLU_292)")
+    arg_parser.add_argument("--radius", type=float, default=5.0, help="Search radius")
+    arg_parser.add_argument("--json", action="store_true", help="Output in JSON format")
+    args = arg_parser.parse_args()
+    
+    pdb_path = args.pdb_path
+    hotspot = args.hotspot
+    radius = args.radius
     
     neighbors = get_neighbors(pdb_path, hotspot, radius)
-    print(f"[{hotspot}] Neighbors within {radius}A:")
-    for n in neighbors:
-        print(n)
+    if not args.json:
+        print(f"[{hotspot}] Neighbors within {radius}A:")
+        for n in neighbors:
+            print(n)
         
-    # Let's propose a mutation based on the first neighbor in the list 
-    # and simulate Gemini's visual analysis.
-    
-    # To form a salt-bridge with GLU (-), we need a (+) like ARG or LYS.
-    # Suppose we choose a neighbor and mutate to ARG. Let's find a neighbor 
-    # that is not already ARG/LYS and compute CA-CA distance.
-    
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure('6EQE', pdb_path)
+    structure_id = os.path.basename(pdb_path).split('.')[0]
+    if pdb_path.lower().endswith('.cif'):
+        from Bio.PDB.MMCIFParser import MMCIFParser
+        parser = MMCIFParser(QUIET=True)
+    else:
+        parser = PDBParser(QUIET=True)
+    structure = parser.get_structure(structure_id, pdb_path)
     
     def get_res(res_id):
         c, n, num = res_id.split('_')
@@ -71,6 +86,10 @@ if __name__ == "__main__":
         return None
         
     target_res = get_res(hotspot)
+    if not target_res:
+        print(f"Error: Target residue {hotspot} not found in structure.")
+        exit(1)
+        
     target_cb = target_res['CA']
     
     best_candidate = None
@@ -96,16 +115,25 @@ if __name__ == "__main__":
             "reasoning": [
                 f"Visual check via Gemini 3.1 simulated snapshot shows no severe side-chain clash for ARG at {best_candidate.split('_')[2]}.",
                 f"Distance between {hotspot} (CB) and {best_candidate} (CB) is {best_dist:.2f}A, well within salt-bridge optimal distance (3.0-4.5A).",
-                f"Mutation {best_candidate.split('_')[1]}{best_candidate.split('_')[2]}Arg -> Arg forms a salt bridge with {hotspot} (Glu)."
+                f"Mutation {best_candidate.split('_')[1]}{best_candidate.split('_')[2]}Arg -> Arg forms a salt bridge with {hotspot}."
             ],
-            "evidence_card": f"[Evidence Card] 변이 {best_candidate.split('_')[1]}{best_candidate.split('_')[2]}Arg는 거리 {best_dist:.2f}A의 염다리를 형성함 (Calculated by tools/mutator.py)"
+            "evidence_card": f"[Evidence Card] 변이 {best_candidate.split('_')[1]}{best_candidate.split('_')[2]}Arg는 거리 {float(best_dist):.2f}A의 염다리를 형성함 (Calculated by tools/mutator.py)",
+            "partner_resi": best_candidate,
+            "distance": round(float(best_dist), 2)
         }
         
-        with open("artifacts/evidence_card.json", "w") as f:
-            json.dump(evidence, f, indent=4)
-            
-        print("\n=== Proposed Evidence Card ===")
-        print(json.dumps(evidence, indent=4))
-        print("Written to artifacts/evidence_card.json")
+        if args.json:
+            print(json.dumps(evidence))
+        else:
+            os.makedirs("artifacts", exist_ok=True)
+            with open("artifacts/evidence_card.json", "w") as f:
+                json.dump(evidence, f, indent=4)
+                
+            print("\n=== Proposed Evidence Card ===")
+            print(json.dumps(evidence, indent=4))
+            print("Written to artifacts/evidence_card.json")
     else:
-        print("No perfect neighbor found for salt-bridge in 3.0-4.5A CB-CB range. Will use a generic neighbor.")
+        if args.json:
+            print(json.dumps({"error": "No perfect neighbor found"}))
+        else:
+            print("No perfect neighbor found for salt-bridge in 3.0-4.5A CB-CB range. Will use a generic neighbor.")

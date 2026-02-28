@@ -4,8 +4,13 @@ import numpy as np
 from Bio.PDB import PDBParser, calc_angle
 
 def analyze_b_factors(pdb_path):
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure('6EQE', pdb_path)
+    structure_id = os.path.basename(pdb_path).split('.')[0]
+    if pdb_path.lower().endswith('.cif'):
+        from Bio.PDB.MMCIFParser import MMCIFParser
+        parser = MMCIFParser(QUIET=True)
+    else:
+        parser = PDBParser(QUIET=True)
+    structure = parser.get_structure(structure_id, pdb_path)
     
     residue_b_factors = {}
     for model in structure:
@@ -27,8 +32,13 @@ def analyze_b_factors(pdb_path):
     return sorted_residues[:5]
 
 def calculate_distance(pdb_path, res1_id, res2_id):
-    parser = PDBParser(QUIET=True)
-    structure = parser.get_structure('6EQE', pdb_path)
+    structure_id = os.path.basename(pdb_path).split('.')[0]
+    if pdb_path.lower().endswith('.cif'):
+        from Bio.PDB.MMCIFParser import MMCIFParser
+        parser = MMCIFParser(QUIET=True)
+    else:
+        parser = PDBParser(QUIET=True)
+    structure = parser.get_structure(structure_id, pdb_path)
     
     # helper to find residue
     def get_residue(target_id):
@@ -59,19 +69,25 @@ def calculate_distance(pdb_path, res1_id, res2_id):
         return None
 
 if __name__ == "__main__":
-    import sys
-    pdb_path = "data/6EQE.pdb"
+    import argparse
+    import json
+    
+    arg_parser = argparse.ArgumentParser(description="Analyze B-factors.")
+    arg_parser.add_argument("--pdb_path", type=str, required=True, help="Path to PDB file")
+    arg_parser.add_argument("--json", action="store_true", help="Output in JSON format")
+    args = arg_parser.parse_args()
+    
+    pdb_path = args.pdb_path
     hotspots = analyze_b_factors(pdb_path)
     
-    if "--json" in sys.argv:
+    if args.json:
         results = {
             "pdb": pdb_path,
-            "hotspots": [{"residue": res, "b_factor": round(b, 2)} for res, b in hotspots],
+            "hotspots": [{"residue": res, "b_factor": round(float(b), 2)} for res, b in hotspots],
         }
         if len(hotspots) >= 2:
             dist = calculate_distance(pdb_path, hotspots[0][0], hotspots[1][0])
-            if dist: results["distance_check"] = round(dist, 2)
-        import json
+            if dist: results["distance_check"] = round(float(dist), 2)
         print(json.dumps(results))
     else:
         print("=== Alpha-Agent Physical Analysis ===")

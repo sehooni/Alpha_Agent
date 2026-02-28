@@ -41,7 +41,8 @@ export default function PdbViewer({ pdbId, pdbData, isWobbling = false, highligh
                 }
 
                 if (dataToLoad) {
-                    viewer.addModel(dataToLoad, "pdb");
+                    const format = (dataToLoad.includes('_cell.angle_alpha') || dataToLoad.startsWith('data_')) ? 'cif' : 'pdb';
+                    viewer.addModel(dataToLoad, format);
                     viewer.setStyle({}, { cartoon: { color: 'spectrum', opacity: 0.8 } });
 
                     if (highlightedResidues.length > 0) {

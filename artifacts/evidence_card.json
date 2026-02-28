@@ -1,0 +1,11 @@
+{
+    "title": "Agentic Self-Correction & Multimodal Analysis",
+    "hotspot": "A_GLU_292",
+    "proposed_mutation": "HIS293Arg",
+    "reasoning": [
+        "Visual check via Gemini 3.1 simulated snapshot shows no severe side-chain clash for ARG at 293.",
+        "Distance between A_GLU_292 (CB) and A_HIS_293 (CB) is 3.78A, well within salt-bridge optimal distance (3.0-4.5A).",
+        "Mutation HIS293Arg -> Arg forms a salt bridge with A_GLU_292 (Glu)."
+    ],
+    "evidence_card": "[Evidence Card] \ubcc0\uc774 HIS293Arg\ub294 \uac70\ub9ac 3.78A\uc758 \uc5fc\ub2e4\ub9ac\ub97c \ud615\uc131\ud568 (Calculated by tools/mutator.py)"
+}

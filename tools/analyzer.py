@@ -59,17 +59,29 @@ def calculate_distance(pdb_path, res1_id, res2_id):
         return None
 
 if __name__ == "__main__":
+    import sys
     pdb_path = "data/6EQE.pdb"
-    print("=== Alpha-Agent Physical Analysis ===")
     hotspots = analyze_b_factors(pdb_path)
-    print("Top Unstable Hotspots (Highest avg B-factors):")
-    for res, b_factor in hotspots:
-        print(f"Residue: {res}, B-factor: {b_factor:.2f}")
-        
-    # As an example, distance between top 1 and top 2
-    if len(hotspots) >= 2:
-        res1 = hotspots[0][0]
-        res2 = hotspots[1][0]
-        dist = calculate_distance(pdb_path, res1, res2)
-        if dist:
-            print(f"Distance between {res1} and {res2} CA atoms: {dist:.2f} A")
+    
+    if "--json" in sys.argv:
+        results = {
+            "pdb": pdb_path,
+            "hotspots": [{"residue": res, "b_factor": round(b, 2)} for res, b in hotspots],
+        }
+        if len(hotspots) >= 2:
+            dist = calculate_distance(pdb_path, hotspots[0][0], hotspots[1][0])
+            if dist: results["distance_check"] = round(dist, 2)
+        import json
+        print(json.dumps(results))
+    else:
+        print("=== Alpha-Agent Physical Analysis ===")
+        print("Top Unstable Hotspots (Highest avg B-factors):")
+        for res, b_factor in hotspots:
+            print(f"Residue: {res}, B-factor: {b_factor:.2f}")
+            
+        if len(hotspots) >= 2:
+            res1 = hotspots[0][0]
+            res2 = hotspots[1][0]
+            dist = calculate_distance(pdb_path, res1, res2)
+            if dist:
+                print(f"Distance between {res1} and {res2} CA atoms: {dist:.2f} A")

@@ -6,11 +6,15 @@ import Script from 'next/script';
 interface PdbViewerProps {
     pdbId?: string;
     pdbData?: string | null;
+    isWobbling?: boolean;
+    highlightedResidues?: number[];
 }
 
-export default function PdbViewer({ pdbId, pdbData }: PdbViewerProps) {
+export default function PdbViewer({ pdbId, pdbData, isWobbling = false, highlightedResidues = [] }: PdbViewerProps) {
     const viewerRef = useRef<HTMLDivElement>(null);
     const [scriptLoaded, setScriptLoaded] = useState(false);
+    const viewerInstance = useRef<any>(null);
+    const animationFrameRef = useRef<number | null>(null);
 
     useEffect(() => {
         // @ts-ignore
@@ -19,6 +23,7 @@ export default function PdbViewer({ pdbId, pdbData }: PdbViewerProps) {
             const viewer = window.$3Dmol.createViewer(viewerRef.current, {
                 backgroundColor: 'rgba(0,0,0,0)'
             });
+            viewerInstance.current = viewer;
 
             const loadModel = async () => {
                 viewer.clear();
@@ -29,8 +34,6 @@ export default function PdbViewer({ pdbId, pdbData }: PdbViewerProps) {
                         const res = await fetch(`https://files.rcsb.org/download/${pdbId}.pdb`);
                         if (res.ok) {
                             dataToLoad = await res.text();
-                        } else {
-                            console.error("Failed to fetch PDB:", res.status);
                         }
                     } catch (e) {
                         console.error("Error fetching PDB:", e);
@@ -39,11 +42,14 @@ export default function PdbViewer({ pdbId, pdbData }: PdbViewerProps) {
 
                 if (dataToLoad) {
                     viewer.addModel(dataToLoad, "pdb");
-                    viewer.setStyle({}, { cartoon: { color: 'spectrum' } });
+                    viewer.setStyle({}, { cartoon: { color: 'spectrum', opacity: 0.8 } });
 
-                    // Emphasize the active hotspot just for demo effect
-                    // In a real app this would be dynamic
-                    viewer.setStyle({ resi: [292, 293] }, { cartoon: { color: 'spectrum' }, stick: { colorscheme: 'redCarbon', radius: 0.2 } });
+                    if (highlightedResidues.length > 0) {
+                        viewer.setStyle({ resi: highlightedResidues }, {
+                            stick: { colorscheme: 'redCarbon', radius: 0.3 },
+                            cartoon: { color: 'red' }
+                        });
+                    }
 
                     viewer.zoomTo();
                     viewer.render();
@@ -53,10 +59,40 @@ export default function PdbViewer({ pdbId, pdbData }: PdbViewerProps) {
             loadModel();
 
             return () => {
+                if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
                 viewer.clear();
             };
         }
-    }, [scriptLoaded, pdbId, pdbData]);
+    }, [scriptLoaded, pdbId, pdbData, highlightedResidues]);
+
+    // Wobble Animation Effect
+    useEffect(() => {
+        const viewer = viewerInstance.current;
+        if (!viewer || !isWobbling) {
+            if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+            return;
+        }
+
+        let startTime = Date.now();
+        const animate = () => {
+            const elapsed = Date.now() - startTime;
+            // Apply small random jitter to simulate "Wobble"
+            const rx = Math.sin(elapsed * 0.05) * 0.5;
+            const ry = Math.cos(elapsed * 0.05) * 0.5;
+
+            viewer.rotate(rx, 'x');
+            viewer.rotate(ry, 'y');
+            viewer.render();
+
+            animationFrameRef.current = requestAnimationFrame(animate);
+        };
+
+        animate();
+
+        return () => {
+            if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+        };
+    }, [isWobbling]);
 
     return (
         <div className="w-full h-full relative z-10">

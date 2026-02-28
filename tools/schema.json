@@ -1,0 +1,51 @@
+{
+    "tools": [
+        {
+            "type": "function",
+            "function": {
+                "name": "analyze_b_factors",
+                "description": "Calculates and returns the residues with the highest B-factors from a given PDB file. Used to identify structurally unstable hotspots.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "pdb_path": {
+                            "type": "string",
+                            "description": "The file path to the target PDB structure (e.g., 'data/6EQE.pdb')"
+                        }
+                    },
+                    "required": [
+                        "pdb_path"
+                    ]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "find_mutator_candidates",
+                "description": "Calculates the exact Euclidean distance (in Angstroms) between the target hotspot residue and its neighbors to propose salt-bridge or hydrogen-bond mutation candidates.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "pdb_path": {
+                            "type": "string",
+                            "description": "The file path to the target PDB structure."
+                        },
+                        "hotspot_id": {
+                            "type": "string",
+                            "description": "The residue ID of the target hotspot (e.g., 'A_GLU_292')"
+                        },
+                        "radius": {
+                            "type": "number",
+                            "description": "Search radius in Angstroms to find neighboring residues. Default is 5.0."
+                        }
+                    },
+                    "required": [
+                        "pdb_path",
+                        "hotspot_id"
+                    ]
+                }
+            }
+        }
+    ]
+}

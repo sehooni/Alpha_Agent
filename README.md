@@ -6,10 +6,14 @@
 
 ## <a name="english"></a> 🇬🇧 English
 
-### 1. Project Overview
-**Alpha-Agent** is an autonomous AI agent prototype designed to bridge the gap between *In-silico* simulations and *In-vivo* experimental results in protein engineering (specifically focusing on PETase optimization). It utilizes the Google Gemini 3.1 Pro multimodal reasoning engine combined with an Antigravity sandbox environment for physics-grounded validation.
+### 1. Project Overview & The Problem We Solve
+**Alpha-Agent** is a **Physics-Grounded Autonomous Agent** designed to eliminate LLM hallucinations in protein engineering. 
 
-Traditional computational tools often fail because they lack biological context, leading to protein aggregation when expressed in a real lab. Alpha-Agent solves this by autonomously analyzing 3D structures, proposing mutations, and most importantly, correcting its own designs by ingesting experimental failure data (like SDS-PAGE images).
+**The Problem: LLM Hallucinations in Biology**
+While Large Language Models (LLMs) can generate text about protein design, they lack intrinsic knowledge of physical laws. When asked to stabilize a protein, an LLM might propose a bulky mutation that sounds logical but physically causes massive steric clashes, instantly unfolding the protein in a real lab setting.
+
+**Our Solution: Grounded Verification**
+Alpha-Agent transforms the LLM from a text-generator into a tool-using director. Before proposing a mutation, it executes backend Python scripts (like Bio.PDB) to calculate actual 3D distances (e.g., verifying a salt bridge is exactly 3.78Å apart). If a proposed design fails physics-based simulation checks, the Agent autonomously rejects it and triggers a **Self-Correction Loop** to redesign a physically viable alternative.
 
 ### 2. Core Features
 *   **Grounded Physics Engine (`tools/analyzer.py`):** Calculates B-factors and Euclidean distances using `Bio.PDB` to identify structural instability hotspots rather than relying on LLM hallucinations.

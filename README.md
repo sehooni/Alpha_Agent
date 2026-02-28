@@ -1,5 +1,7 @@
 # 🧬 Alpha-Agent: Autonomous Multimodal Protein Design Loop
 
+## Gemini 3 Seoul Hackathon 2026 Finalist Project
+
 [🇬🇧 English](#english) | [🇰🇷 한국어](#korean)
 
 ---
@@ -40,10 +42,13 @@ Alpha-Agent transforms the LLM from a text-generator into a tool-using director.
 # 1. Navigate to the web directory
 cd web
 
-# 2. Install dependencies (if not already installed)
+# 2. Install dependencies
 npm install
 
-# 3. Build and Start the production server
+# 3. Setup Gemini API Key (Required for Grounded Reasoning)
+echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env.local
+
+# 4. Build and Start the production server
 npm run build
 npm run start
 ```
@@ -83,10 +88,13 @@ Then open `http://localhost:3000` in your browser.
 # 1. web 디렉토리로 이동
 cd web
 
-# 2. 패키지 설치 (최초 1회)
+# 2. 패키지 설치
 npm install
 
-# 3. 빌드 및 프로덕션 서버 실행
+# 3. Gemini API 환경변수 설정 (백엔드 LLM 추론에 필수)
+echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env.local
+
+# 4. 빌드 및 프로덕션 서버 실행
 npm run build
 npm run start
 ```

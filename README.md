@@ -1,6 +1,6 @@
 # 🧬 Alpha-Agent: Autonomous Multimodal Protein Design Loop
 
-## Gemini 3 Seoul Hackathon 2026 Finalist Project
+## Gemini 3 Seoul Hackathon 2026 Finalist Project (Alpha_BioAgent)
 
 [🇬🇧 English](#english) | [🇰🇷 한국어](#korean)
 

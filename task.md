@@ -1,9 +1,9 @@
 # 🧬 Alpha-Agent Task Roadmap
 
 ## Phase 1: Environment & Traceability (0-1h)
-- [x] Antigravity 샌드박스 내 `biopython`, `numpy` 설치 및 환경 점검.
-- [x] Git 레포지토리 초기화 및 `main` 브랜치 설정.
-- [x] 타겟 PDB(6EQE - PETase) 로드 및 `/data` 저장.
+- [ ] Antigravity 샌드박스 내 `biopython`, `numpy` 설치 및 환경 점검.
+- [ ] Git 레포지토리 초기화 및 `main` 브랜치 설정.
+- [ ] 타겟 PDB(6EQE - PETase) 로드 및 `/data` 저장.
 
 ## Phase 2: Grounded Physics Engine (1-2h)
 - [ ] **[Original Work]** `tools/analyzer.py` 작성: B-factor 분석 및 유클리드 거리 계산 엔진.

@@ -45,12 +45,11 @@ cd web
 # 2. Install dependencies
 npm install
 
-# 3. Setup Gemini API Key (Required for Grounded Reasoning)
+# 3. Setup Gemini API Key
 echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env.local
 
-# 4. Build and Start the production server
-npm run build
-npm run start
+# 4. Start the development server
+npm run dev
 ```
 Then open `http://localhost:3000` in your browser.
 
@@ -91,11 +90,10 @@ cd web
 # 2. 패키지 설치
 npm install
 
-# 3. Gemini API 환경변수 설정 (백엔드 LLM 추론에 필수)
+# 3. Gemini API 환경변수 설정
 echo "GEMINI_API_KEY=your_gemini_api_key_here" > .env.local
 
-# 4. 빌드 및 프로덕션 서버 실행
-npm run build
-npm run start
+# 4. 개발 서버 실행
+npm run dev
 ```
 이후 웹 브라우저에서 `http://localhost:3000`에 접속하여 대시보드를 확인합니다.

@@ -43,7 +43,8 @@ export default function PdbViewer({ pdbId, pdbData, isWobbling = false, highligh
                 if (dataToLoad) {
                     const format = (dataToLoad.includes('_cell.angle_alpha') || dataToLoad.startsWith('data_')) ? 'cif' : 'pdb';
                     viewer.addModel(dataToLoad, format);
-                    viewer.setStyle({}, { cartoon: { color: 'spectrum', opacity: 0.8 } });
+                    // Updated to V2: use lightgrey for the base structure so highlighted parts stand out
+                    viewer.setStyle({}, { cartoon: { color: 'lightgrey', opacity: 0.8 } });
 
                     if (highlightedResidues.length > 0) {
                         viewer.setStyle({ resi: highlightedResidues }, {

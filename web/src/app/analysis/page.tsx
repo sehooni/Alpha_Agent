@@ -73,6 +73,9 @@ export default function Dashboard() {
         const data = await response.json();
         if (isActive) {
           setTraceInfo(data.traceInfo);
+          if (data.similarStructures) {
+            setMappedProteins(data.similarStructures);
+          }
           if (data.traceInfo && data.traceInfo.hotspotResi) {
             setHighlightedRes([
               parseInt(data.traceInfo.hotspotResi) - 1,
@@ -92,30 +95,13 @@ export default function Dashboard() {
     return () => { isActive = false; };
   }, [pdbData, pdbId, isKorean]);
 
-  // Protein Mapping Logic (AI Studio Sync)
+  // Protein Mapping Logic (AI Studio Sync) - Replaced with Crawler mapping from /api/analyze in V2
   useEffect(() => {
     if (!pdbId) {
       setMappedProteins([]);
       return;
     }
-
-    setIsMappingLoading(true);
-    // Simulating RCSB PDB API call to fetch UniProt mapping
-    const timer = setTimeout(() => {
-      if (pdbId.toUpperCase() === '6EQE') {
-        setMappedProteins([
-          { id: 'P01112', name: 'GTPase HRas' },
-          { id: 'Q9Y5A3', name: 'GTPase activating protein' }
-        ]);
-      } else if (pdbId.toUpperCase() === '1CRN') {
-        setMappedProteins([{ id: 'P01542', name: 'Crambin' }]);
-      } else {
-        setMappedProteins([{ id: 'P99999', name: 'Unknown Protein' }]);
-      }
-      setIsMappingLoading(false);
-    }, 800);
-
-    return () => clearTimeout(timer);
+    // Handled by the fetchTraceInfo call now, which loads it from crawler.py
   }, [pdbId]);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -202,8 +188,8 @@ export default function Dashboard() {
               <Activity className="w-5 h-5 text-indigo-400" />
             </div>
             <div>
-              <h1 className="font-bold text-lg tracking-tight text-white">Alpha-Agent <span className="text-indigo-400 font-normal">Sandbox</span></h1>
-              <p className="text-[10px] uppercase tracking-widest text-neutral-500 font-semibold">{isKorean ? "그라운디드 추론 엔진" : "Grounded Reasoning Engine"}</p>
+              <h1 className="font-bold text-lg tracking-tight text-white">Alpha-Agent <span className="text-indigo-400 font-normal">V2</span></h1>
+              <p className="text-[10px] uppercase tracking-widest text-neutral-500 font-semibold">{isKorean ? "구조 크롤러 & 핫스팟 분석" : "Structural Crawler & Hotspot Analysis"}</p>
             </div>
           </Link>
 
@@ -292,11 +278,10 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* Mapped Proteins Panel */}
               <div className="mt-3 px-2 flex items-center gap-3">
                 <div className="text-xs font-semibold text-neutral-500 flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5" />
-                  Mapped Proteins (UniProt)
+                  <Database className="w-3.5 h-3.5" />
+                  {isKorean ? "유사 구조 (크롤링됨)" : "Similar Structures (Crawled)"}
                 </div>
                 {isMappingLoading ? (
                   <div className="flex items-center gap-2 text-xs text-neutral-600">
@@ -315,8 +300,8 @@ export default function Dashboard() {
                         {p.id} <span className="opacity-50 line-clamp-1 max-w-[100px]">{p.name}</span>
                       </a>
                     ))}
-                    {mappedProteins.length === 0 && (
-                      <span className="text-xs text-neutral-600 italic">No UniProt mapping found</span>
+                    {mappedProteins.length === 0 && !isTraceLoading && (
+                      <span className="text-xs text-neutral-600 italic">No similar structures found</span>
                     )}
                   </div>
                 )}
@@ -395,6 +380,13 @@ export default function Dashboard() {
                       </button>
                     )
                   })}
+                  <button
+                    onClick={() => { setActiveRightTab('results'); setActiveToolResult('crawler'); }}
+                    className={`w-full text-left p-3 rounded-lg border transition-all ${activeToolResult === 'crawler' && activeRightTab === 'results' ? 'border-indigo-500 bg-indigo-500/10 shadow-[0_0_15px_rgba(99,102,241,0.2)]' : 'border-neutral-800 bg-black/40 hover:bg-neutral-800/50 hover:border-neutral-700'}`}
+                  >
+                    <code className="text-xs text-blue-400">crawl_similar_structures()</code>
+                    <p className="text-xs text-neutral-500 mt-1 line-clamp-2">{isKorean ? "RCSB DB를 검색하여 유사한 구조들을 가져옵니다." : "Queries RCSB DB for similar structures."}</p>
+                  </button>
                 </div>
               </div>
             </div>
@@ -603,17 +595,34 @@ Rank | Chain | Resi | Score (B)
  - Mechanics: ${isKorean ? traceInfo.mut2DescKo : traceInfo.mut2Desc}`}
                         </div>
                       </div>
+                      </div>
                     )}
-                  </div>
+                  {activeToolResult === 'crawler' && (
+                    <div className="animate-in fade-in zoom-in-95 duration-300 border border-neutral-800 rounded-xl bg-[#0a0a0a] overflow-hidden shadow-2xl mt-4">
+                      <div className="bg-neutral-900/50 px-4 py-3 border-b border-neutral-800 flex items-center gap-2">
+                        <Terminal className="w-4 h-4 text-blue-400" />
+                        <span className="font-mono text-sm text-neutral-300">{`crawl_similar(pdb_id="${pdbId}")`}</span>
+                      </div>
+                      <div className="p-4 font-mono text-xs text-emerald-300 whitespace-pre overflow-x-auto">
+                        {`> Initiating RCSB PDB Search via Sequence/Structure similarity...
+> Target: ${pdbId}
+> Parsing results...
+
+Found ${mappedProteins.length} similar entries:
+${mappedProteins.map((p, i) => `[MATCH ${i + 1}] ID: ${p.id} - ${p.name}`).join('\n')}`}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 </div>
               ) : null}
-            </div>
           </div>
-
         </div>
 
-      </main>
-
     </div>
+
+      </main >
+
+    </div >
   );
 }

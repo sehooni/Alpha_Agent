@@ -151,10 +151,20 @@ export async function POST(req: Request) {
             interactionKo: geminiData.interactionKo
         };
 
+        // 4. Run Crawler for similar structures
+        const crawlerCmd = `python3 ../tools/crawler.py --pdb_id ${pdbId || '6EQE'}`;
+        let similarStructures = [];
+        try {
+            const { stdout: crawlerOut } = await execAsync(crawlerCmd);
+            similarStructures = JSON.parse(crawlerOut);
+        } catch (e) {
+            console.error("Crawler Error:", e);
+        }
+
         // cleanup temp file
         await fs.unlink(filePath).catch(() => { });
 
-        return NextResponse.json({ traceInfo });
+        return NextResponse.json({ traceInfo, similarStructures });
 
     } catch (error: any) {
         console.error('API Error:', error);

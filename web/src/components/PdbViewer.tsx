@@ -54,6 +54,32 @@ export default function PdbViewer({ pdbId, pdbData, isWobbling = false, highligh
                     }
 
                     viewer.zoomTo();
+
+                    // Optional hover logic to show residue info
+                    viewer.setHoverable({}, true,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+                        function (atom: any, currentViewer: any, event: any, container: any) {
+                            if (!atom.label) {
+                                atom.label = currentViewer.addLabel(`${atom.resn}:${atom.resi}`, {
+                                    position: atom,
+                                    backgroundColor: 'rgba(0,0,0,0.8)',
+                                    fontColor: 'white',
+                                    backgroundOpacity: 0.8,
+                                    fontSize: 14,
+                                    padding: 4,
+                                    borderRadius: 4
+                                });
+                            }
+                        },
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+                        function (atom: any, currentViewer: any) {
+                            if (atom.label) {
+                                currentViewer.removeLabel(atom.label);
+                                delete atom.label;
+                            }
+                        }
+                    );
+
                     viewer.render();
                 }
             };

@@ -587,42 +587,41 @@ Rank | Chain | Resi | Score (B)
 [CANDIDATE 1] Partner: ${traceInfo.partner}
  - Exact Distance: ${traceInfo.dist}Å
  - Structural Context: Solvent exposed loop
- - Proposed Mutation: ${traceInfo.mut1}
- - Mechanics: ${isKorean ? traceInfo.interactionKo : traceInfo.interaction}
+  - Proposed Mutation: ${traceInfo.mut1}
+  - Mechanics: ${isKorean ? traceInfo.interactionKo : traceInfo.interaction}
 
 [CANDIDATE 2] Target Sub: ${traceInfo.mut2}
- - Proposed Mutation: ${traceInfo.mut2}
- - Mechanics: ${isKorean ? traceInfo.mut2DescKo : traceInfo.mut2Desc}`}
+  - Proposed Mutation: ${traceInfo.mut2}
+  - Mechanics: ${isKorean ? traceInfo.mut2DescKo : traceInfo.mut2Desc}`}
                         </div>
                       </div>
-                      </div>
                     )}
-                  {activeToolResult === 'crawler' && (
-                    <div className="animate-in fade-in zoom-in-95 duration-300 border border-neutral-800 rounded-xl bg-[#0a0a0a] overflow-hidden shadow-2xl mt-4">
-                      <div className="bg-neutral-900/50 px-4 py-3 border-b border-neutral-800 flex items-center gap-2">
-                        <Terminal className="w-4 h-4 text-blue-400" />
-                        <span className="font-mono text-sm text-neutral-300">{`crawl_similar(pdb_id="${pdbId}")`}</span>
-                      </div>
-                      <div className="p-4 font-mono text-xs text-emerald-300 whitespace-pre overflow-x-auto">
-                        {`> Initiating RCSB PDB Search via Sequence/Structure similarity...
+                    {activeToolResult === 'crawler' && (
+                      <div className="animate-in fade-in zoom-in-95 duration-300 border border-neutral-800 rounded-xl bg-[#0a0a0a] overflow-hidden shadow-2xl mt-4">
+                        <div className="bg-neutral-900/50 px-4 py-3 border-b border-neutral-800 flex items-center gap-2">
+                          <Terminal className="w-4 h-4 text-blue-400" />
+                          <span className="font-mono text-sm text-neutral-300">{`crawl_similar(pdb_id="${pdbId}")`}</span>
+                        </div>
+                        <div className="p-4 font-mono text-xs text-emerald-300 whitespace-pre overflow-x-auto">
+                          {`> Initiating RCSB PDB Search via Sequence/Structure similarity...
 > Target: ${pdbId}
 > Parsing results...
 
 Found ${mappedProteins.length} similar entries:
 ${mappedProteins.map((p, i) => `[MATCH ${i + 1}] ID: ${p.id} - ${p.name}`).join('\n')}`}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
                 </div>
               ) : null}
+            </div>
           </div>
+
         </div>
 
+      </main>
+
     </div>
-
-      </main >
-
-    </div >
   );
 }

@@ -75,7 +75,7 @@ export default function PdbViewer({ pdbId, pdbData, isWobbling = false, highligh
             return;
         }
 
-        let startTime = Date.now();
+        const startTime = Date.now();
         const animate = () => {
             const elapsed = Date.now() - startTime;
             // Apply small random jitter to simulate "Wobble"

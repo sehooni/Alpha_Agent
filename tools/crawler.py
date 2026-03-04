@@ -4,29 +4,26 @@ import urllib.parse
 import sys
 
 def get_similar_pdbs(pdb_id, limit=5):
-    # RCSB PDB Search API syntax for sequence similarity (or structure, here we use structure similarity as a proxy, 
-    # but a simple sequence similarity query is straightforward)
-    
-    # We will use sequence similarity > 90% or 100% (identity)
+    # Use structure similarity (strict_shape_match)
     query = {
       "query": {
         "type": "terminal",
-        "service": "sequence",
+        "service": "structure",
         "parameters": {
-          "evalue_cutoff": 0.1,
-          "identity_cutoff": 0.9,
-          "target": "pdb_protein_sequence",
-          "value": pdb_id
+          "operator": "strict_shape_match",
+          "value": {
+            "entry_id": pdb_id,
+            "assembly_id": "1"
+          }
         }
       },
+      "return_type": "entry",
       "request_options": {
-        "scoring_strategy": "sequence",
         "paginate": {
           "start": 0,
           "rows": limit + 1
         }
-      },
-      "return_type": "entry"
+      }
     }
 
     try:

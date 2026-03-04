@@ -292,10 +292,10 @@ export default function Dashboard() {
                     {mappedProteins.map(p => (
                       <a
                         key={p.id}
-                        href={`https://alphafold.ebi.ac.uk/entry/${p.id}`}
+                        href={`https://www.rcsb.org/structure/${p.id}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="pointer-events-auto px-2 py-1 rounded-md bg-neutral-800 hover:bg-indigo-500 hover:text-white border border-neutral-700 transition-all text-[11px] font-mono text-neutral-300 flex items-center gap-1 animate-in zoom-in-95"
+                        className="pointer-events-auto px-2 py-1 rounded-md bg-neutral-800 hover:bg-indigo-500 hover:text-white border border-neutral-700 transition-all text-[11px] font-mono text-neutral-300 flex items-center gap-1 animate-in zoom-in-95 cursor-pointer underline decoration-indigo-500/30 hover:decoration-white/50"
                       >
                         {p.id} <span className="opacity-50 line-clamp-1 max-w-[100px]">{p.name}</span>
                       </a>
